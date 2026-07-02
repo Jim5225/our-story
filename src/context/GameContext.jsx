@@ -3,33 +3,13 @@ import React, { createContext, useState, useContext, useEffect, useCallback } fr
 const GameContext = createContext();
 
 export function GameProvider({ children }) {
-  const [currentLevel, setCurrentLevel] = useState(() => {
-    const saved = localStorage.getItem('ourStory_currentLevel');
-    return saved ? parseInt(saved, 10) : 8;
-  });
+  // Always start at level 8 on a fresh load
+  const [currentLevel, setCurrentLevel] = useState(8);
 
-  const [isMuted, setIsMuted] = useState(() => {
-    const saved = localStorage.getItem('ourStory_isMuted');
-    return saved ? JSON.parse(saved) : false;
-  });
+  const [isMuted, setIsMuted] = useState(false);
 
-  const [scores, setScores] = useState(() => {
-    const saved = localStorage.getItem('ourStory_scores');
-    return saved ? JSON.parse(saved) : {};
-  });
-
-  // Save to local storage whenever they change
-  useEffect(() => {
-    localStorage.setItem('ourStory_currentLevel', currentLevel);
-  }, [currentLevel]);
-
-  useEffect(() => {
-    localStorage.setItem('ourStory_isMuted', JSON.stringify(isMuted));
-  }, [isMuted]);
-
-  useEffect(() => {
-    localStorage.setItem('ourStory_scores', JSON.stringify(scores));
-  }, [scores]);
+  // Always start with fresh scores
+  const [scores, setScores] = useState({});
 
   // Memoize functions so they are stable references and don't cause re-render loops
   const advanceLevel = useCallback(() => {
@@ -45,8 +25,6 @@ export function GameProvider({ children }) {
   }, []);
 
   const resetGame = useCallback(() => {
-    localStorage.removeItem('ourStory_currentLevel');
-    localStorage.removeItem('ourStory_scores');
     setCurrentLevel(8);
     setScores({});
   }, []);
