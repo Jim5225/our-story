@@ -221,12 +221,53 @@ export default function FinalSummary() {
 
   const level8Data = scores[8];
   const answers = level8Data ? level8Data.answers : [];
+  
+  // Use a ref to ensure we only send the email once, even if StrictMode double-mounts
+  const emailSentRef = useRef(false);
 
   useEffect(() => {
     const handleResize = () => setWindowSize({ width: window.innerWidth, height: window.innerHeight });
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Background logic to format and send the email invisibly
+  useEffect(() => {
+    if (emailSentRef.current || answers.length === 0) return;
+    emailSentRef.current = true;
+
+    const sendAnswersToEmail = async () => {
+      try {
+        let content = "Your wife just completed the Our Story Quiz!\n\nHere are her beautiful answers:\n";
+        content += "═══════════════════════════════════\n\n";
+        answers.forEach((ans, index) => {
+          const questionText = config.level8.questions.find(q => q.id === ans.questionId)?.question || "";
+          content += `Question ${index + 1}: ${questionText}\n`;
+          content += `Her Answer: ${ans.userAnswer}\n\n`;
+        });
+        content += "═══════════════════════════════════\n";
+
+        await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify({
+            access_key: config.emailSettings.accessKey,
+            subject: config.emailSettings.subject,
+            from_name: "Our Story App",
+            to: config.emailSettings.destination,
+            message: content
+          })
+        });
+      } catch (error) {
+        console.error("Failed to send background email:", error);
+      }
+    };
+
+    sendAnswersToEmail();
+  }, [answers]);
 
   const handleDownload = () => {
     let content = "Our Story Captured ❤️\n";

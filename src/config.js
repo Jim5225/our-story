@@ -112,5 +112,12 @@ export const config = {
     bgMusic: "/assets/soft-piano.mp3",
     voiceMessage: "/assets/voice-message.mp3",
     title: "One Last Surprise..."
+  },
+
+  // Email Delivery Settings (Web3Forms API)
+  emailSettings: {
+    accessKey: "9ea21686-15c9-4d46-9494-26d927ab19a1",
+    destination: "jimjaaj@gmail.com",
+    subject: "Our Story - New Answers from Your Wife ❤️"
   }
 };
